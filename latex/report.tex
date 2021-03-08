@@ -1,0 +1,143 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 3.1 (25/3/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Linux and Unix Users Group at Virginia Tech Wiki 
+% (https://vtluug.org/wiki/Example_LaTeX_chem_lab_report)
+%
+% Modified by:
+% Riccardo Prinzivalle
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage[square,numbers]{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+\usepackage[hyphens]{url} % required for url in bibliography
+\usepackage{hyperref} % required for hyperlink in url
+\usepackage{float} % required for positioning of table
+\usepackage{pdflscape} % required for table rotation
+\usepackage{array, makecell} % for multiline cells of table
+%\usepackage{tabularx}
+%\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{Implementation of SED with Depthwise Separable and Dilated Convolutions \\[0.2em]\small{}Neural Networks Sapienza 2020} % Title
+
+\author{Riccardo \textsc{Prinzivalle}} % Author name
+
+\date{March 2021} % Date for the report
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+%\begin{abstract}
+%Some abstract text for presentation
+%\end{abstract}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 1
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+\label{sec:intro}
+
+
+ 
+%----------------------------------------------------------------------------------------
+%	SECTION 2
+%----------------------------------------------------------------------------------------
+
+\section{Monophonic SED}
+\label{sec:mono}
+
+\subsection{Data analysis}
+\label{subsec:mono_analysis}
+
+\subsection{Model formulation}
+\label{subsec:mono_model}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 3
+%----------------------------------------------------------------------------------------
+
+\section{Polyphonic SED}
+\label{sec:poly}
+
+
+
+\subsection{Data analysis}
+\label{subsec:poly_analysis}
+
+\subsection{Model formulation}
+\label{subsec:poly_model}
+
+
+
+%----------------------------------------------------------------------------------------
+%	SECTION 4
+%----------------------------------------------------------------------------------------
+
+\section{Experimental Results}
+\label{sec:results}
+
+ 
+
+\subsection{Monophonic results}
+\label{subsec:mono_results}
+
+\subsection{Polyphonic results}
+\label{subsec:poly_results}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 5
+%----------------------------------------------------------------------------------------
+
+\section{How to train NN on AMD GPU}
+\label{sec:AMD}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 6
+%----------------------------------------------------------------------------------------
+
+\section{Conclusions}
+\label{sec:end}
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+%\bibliographystyle{abbrv}
+\bibliographystyle{unsrt}
+
+\bibliography{bibliography}
+
+%\nocite{*} % in case no ciattion was done or not all references has been cited 
+
+%----------------------------------------------------------------------------------------
+
+
+\end{document}
