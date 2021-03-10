@@ -32,7 +32,6 @@
 \usepackage{float} % required for positioning of table
 \usepackage{pdflscape} % required for table rotation
 \usepackage{array, makecell} % for multiline cells of table
-\usepackage{hyperref}
 %\usepackage{tabularx}
 %\newcolumntype{L}{>{\raggedright\arraybackslash}X}
 
@@ -127,7 +126,8 @@ The main differences are in bit depth, from 4 to 32 bit, the majority with 16 bi
 \subsection{Feature Extraction}
 \label{subsec:mono_feature}
 
-This phase adopts librosa \cite{mcfee2015librosa}, which is a sound processing library for python.
+This phase adopts librosa \cite{mcfee2015librosa}, which is a sound processing library for python. Its use helps to deal with different audio characteristics since by default librosa converts audio to 22 KHz sampling rate and 16 bit depth. Since the majority of audio recordings are at 44.1 KHz, it may seem that down sampling may reduce audio quality, but if we visualize the sound with a spectrogram, it will be clear that most of frequency content is distributed well below the 11 KHz (which is the maximum frequency a 22 KHz sampling rate can process), so in this case it reduces the dimension of the data without losing much information. For what concerns the bit depth, the majority of recordings are already at 16 bit, so it does not change much the data. Audio file are loaded and transformed into array series by \textit{load} function, which is also responsible of audio conversion and standardization.\newline
+The reference paper \cite{drossos2020sound} uses Mel Frequency Cepstral Coefficients (MFCC) to extract features from the array sound data. MFCCs are a way of measuring the rate of information change in spectral bands and storing it in coefficients; moreover, the rate of change is modeled in a non linear way since the Mel band is logarithmic and the adoption of this band is able to capture the rate of change in a similar way to what the human hear does \cite{MFCC}. 
 
 \subsection{Model formulation}
 \label{subsec:mono_model}
