@@ -85,27 +85,27 @@ The dataset is composed by 8732 labelled small sound recordings (less than 4 sec
 	\begin{center}
 		\begin{tabular}{ |c | c | }
 			\hline
-			Label & number of elements \\ 
+			Label 				& number of elements \\ 
 			\hline
-			air\_conditioner & 1000 \\
+			air\_conditioner 	& 1000 \\
 			\hline
-			car\_horn & 429 \\
+			car\_horn 			& 429 \\
 			\hline
-			children\_playing & 1000 \\
+			children\_playing 	& 1000 \\
 			\hline
-			dog\_bark & 1000 \\
+			dog\_bark 			& 1000 \\
 			\hline
-			drilling & 1000 \\
+			drilling 			& 1000 \\
 			\hline
-			engine\_idling & 1000 \\
+			engine\_idling 		& 1000 \\
 			\hline
-			gun\_shot & 374 \\
+			gun\_shot 			& 374 \\
 			\hline
-			jackhammer & 1000 \\
+			jackhammer 			& 1000 \\
 			\hline
-			siren & 929 \\
+			siren 				& 929 \\
 			\hline
-			street\_music & 1000 \\
+			street\_music 		& 1000 \\
 			\hline
 		\end{tabular}
 		\caption{Monophonic dataset label distribution}
@@ -136,7 +136,8 @@ The idea is to extract the MFCC with the basic settings and change just the numb
 \end{equation}
 
 This means that if the sampling rate is 22 KHz and the number of bit is 2048, then the window interval is about 93 ms. The execution shows that 93 ms are too much for just 3 recordings which have a smaller duration. The result of feature extraction is a matrix of 40 features by a varying length depending on the length of the processed audio. Here a problem arises: a neural network may only process input of equal length, so the smaller recordings are padded with zeros to reach the dimension of the longer audio, which has a length of 174 frames. The data are ready to be feed as input of the neural network now.\newline
-A small technical digression: since python based libraries for sound processing are easier to use but slower, the extracted features are saved in pickle file to be easily loaded without reprocessing every time the dataset \cite{pickle}.
+A small technical digression: since python based libraries for sound processing are easier to use but slower, the extracted features are saved in pickle file to be easily loaded without reprocessing every time the dataset \cite{pickle}.\newline
+Processed data are labeled with a categorical encoding using \textit{keras utils} and \textit{sklearn preprocessing} in automatic way.
 
 \subsection{Model formulation}
 \label{subsec:mono_model}
@@ -156,8 +157,58 @@ The proposed approach substitutes the convolutional layers with depth-wise separ
 \section{Polyphonic SED}
 \label{sec:poly}
 
+Polyphonic SED, instead, is more complicate: the idea is to have recordings with multiple overlapping sounds and to detect correctly the category of each single sound and the instants when the sound starts and ends (the maximum polyphony is 5). The dataset used is \textit{TUT-SED Synthetic 2016} \cite{Cakir_2017}, which is a synthetic dataset, while the section \ref{sec:mono} dataset is composed by recordings in real spaces and not modified in any way. Details on how the dataset has been created can be found at \url{https://webpages.tuni.fi/arg/paper/taslp2017-crnn-sed/tut-sed-synthetic-2016}.
+
 \subsection{Data analysis}
 \label{subsec:poly_analysis}
+
+The dataset is composed by 100 long sound recordings (about some minutes) containing a mixture of different sound events. Each mixture contains multiple labels specified by onset and offset of each single sound event. Dataset contains a total of 36326 events distributed in 16 classes, the distribution can be seen in table \ref{tab:poly_distribution}.
+
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{ |c | c | }
+			\hline
+			Label 				& number of elements \\ 
+			\hline
+			footsteps 			& 8302 \\
+			\hline
+			horsewalk			& 6603 \\
+			\hline
+			bird\_singing 		& 6079 \\
+			\hline
+			baby\_crying 		& 3342 \\
+			\hline
+			dog\_barking 		& 3145 \\
+			\hline
+			gun\_shot 			& 1581 \\
+			\hline
+			crowd\_applause 	& 1400 \\
+			\hline
+			cat\_meowing 		& 885 \\
+			\hline
+			motorcycle 			& 824 \\
+			\hline
+			thunder 			& 774 \\
+			\hline
+			glass\_smash 		& 693 \\
+			\hline
+			crowd\_cheering 	& 613 \\
+			\hline
+			alarms\_and\_sirens & 571 \\
+			\hline
+			mixer 				& 547 \\
+			\hline
+			rain 				& 511 \\
+			\hline
+			bus 				& 456 \\
+			\hline
+		\end{tabular}
+		\caption{Monophonic dataset label distribution}
+		\label{tab:poly_distribution}
+	\end{center}
+\end{table}
+
+From the table, it is easily visible that classes are not distributed equally, moreover they have different duration, for example \textit{rain} is a class with rather long duration while \textit{horsewalk} contains very small duration events. As a rule of thumb of this dataset, one can enounce that the longer the duration the smaller the number of appearances, and vice versa. An histogram of audio lengths distribution can be found in figure \ref{fig:poly_duration}; this confirms the rule of thumb.
 
 \begin{figure}[H]
 	\centering
@@ -166,11 +217,24 @@ The proposed approach substitutes the convolutional layers with depth-wise separ
 	\label{fig:poly_duration}
 \end{figure}
 
+Since the dataset is synthetic, audio properties are unique for all the mixtures: single channel, 32 bit depth and 44.1 KHz sampling rate.
+
 \subsection{Feature Extraction}
 \label{subsec:poly_feature}
 
+This case will use the same technique of monophonic SED in section \ref{subsec:mono_feature}: the audio is loaded and transformed to 16 bit depth and 22 KHz sampling rate, this is done to reduce the dimensionality of processed data and speed up computation at cost of small losses of audio quality.\newline
+MFCCs are extracted with different parameters in this case: the number of feature per frame is 40, with 40 mel bands, 20 ms window and 50 \% overlap. This means, using formula \ref{eq:window_interval}, that it is necessary to use 440 bit per window and 220 for the hop length since it is required a 50 \% overlap (this means that the following frame extracted starts at half of the preceding frame).\newline
+Extracted data are then subdivided in sub-vectors of features composed by 1024 time frames: this is done to create an equal input for the neural network and enlarge the input data, instead of having less vectors of greater length. Moreover, this allows to standardize the input dimension in an easy way, since at most it is required to pad 1023 frames, while processing each extracted vector without subdivision would have brought bigger padding and much wasted computational power.
+
+\subsection{Data labeling}
+\label{subsec:poly_label}
+
+Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results.
+
 \subsection{Model formulation}
 \label{subsec:poly_model}
+
+This section will explain multiple model architecture introduced for poly SED: a baseline, a dilated baseline, a dessed baseline and a dessed-dilated approach. Each model has input of 1024 time frame times 40 features times 1 channel and outputs a 1024 time frame by 16 classes matrix.
 
 
 
