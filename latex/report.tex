@@ -453,6 +453,7 @@ The introduction of depth-wise separable convolutions allows to reduce drastical
 \end{figure}
 
 Overall the model loses about 0.1 point of f1-score, 0.633, which is enough to say that the baseline is better considering the score but the number of parameters is lower in this new approach. \newline
+For what concerns the proposed model, here there is a comparison on both the methods tested to connect the dilated convolution with the dense layer. The 1x1 convolution with (1,3) stride performs poorly: after 64 epochs the accuracy arrives to 0.928 and loss to 0.24. This may seem a good performance, but if we look at f1-score, it shows the bad score: 0.125, which is very low compared to the other proposed approaches. Fig. \ref{fig:poly_new_acc} shows differences in accuracy of the two new model approaches. 
 
 \begin{figure}[H]
 	\centering
@@ -472,6 +473,8 @@ Overall the model loses about 0.1 point of f1-score, 0.633, which is enough to s
 	\label{fig:poly_new_acc}
 \end{figure}
 
+The other alternative used, is to adopt a  max pooling layer with (1,3) dimension both for kernel and stride instead of 1x1 convolution; this different approach has the hoped benefits: 0.952 accuracy and 0.148 loss. The f1-score is 0.628 which is lower compared to the other proposed approaches but a lot higher w.r.t. the 1x1 convolution case. Fig. \ref{fig:poly_new_loss} shows the history of loss functions in both new model approaches.
+
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{.5\textwidth}
@@ -489,6 +492,8 @@ Overall the model loses about 0.1 point of f1-score, 0.633, which is enough to s
 	\caption{Proposed model loss comparison}
 	\label{fig:poly_new_loss}
 \end{figure}
+
+%TODO ADD COMPARISON ON DIMENSION AND F1 AS A TABLE
 
 %----------------------------------------------------------------------------------------
 %	SECTION 5
