@@ -65,7 +65,7 @@
 \section{Introduction}
 \label{sec:intro}
 
-This project is a study and implementation of a polyphonic sound event detection extracted from \cite{drossos2020sound}. It is also based on the baseline reference of \cite{drossos2020sound}, which is \cite{Cakir_2017}. These two works represent the main source of this project. Here there will be presented both a replication of the paper approach together with a monophonic sound event detection, since to obtain the original dataset took some time, the author thought to start working with another dataset and then move the work to the original dataset when it would have been available. Section \ref{sec:mono} and \ref{sec:poly} are organized as follows: first an analysis of the dataset is performed to better understand it, then it is explained how the feature have been extracted and finally it is proposed a model to solve the problem. Section \ref{sec:results} regroups the results for both datasets, then it is explained a brief digression on how to train a neural network model on an AMD GPU on section \ref{sec:AMD} since the author's setup has only an AMD GPU. The work is ended by conclusions of section \ref{sec:end}.
+This project is a study and implementation of a polyphonic sound event detection extracted from \cite{drossos2020sound}. It is also based on the baseline reference of \cite{drossos2020sound}, which is \cite{Cakir_2017}. These two works represent the main source of this project. Here there will be presented both a replication of the paper approach together with a monophonic sound event detection, since to obtain the original dataset took some time, the author thought to start working with another dataset and then move the work to the original dataset when it would have been available. Section \ref{sec:mono} and \ref{sec:poly} are organized as follows: first an analysis of the dataset is performed to better understand it, then it is explained how the data have been preprocessed and finally it is proposed a model to solve the problem. Section \ref{sec:results} regroups the results for both datasets, then it is explained a brief digression on how to train a neural network model on an AMD GPU on section \ref{sec:AMD} since the author's setup has only an AMD GPU. The work is ended by conclusions of section \ref{sec:end}.
  
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -74,7 +74,7 @@ This project is a study and implementation of a polyphonic sound event detection
 \section{Monophonic SED}
 \label{sec:mono}
 
-Monophonic Sound Event Detection consist of predicting a single label for an audio recording: the record will likely contain some noise but it generally contains a single and remarkable sound to be identified. In this case, it is used the \textit{UrbanSound8K} dataset \cite{Salamon:UrbanSound:ACMMM:14}.
+Monophonic Sound Event Detection consist of predicting a single class label for an audio recording: the record will likely contain some noise but it generally contains a single and remarkable sound to be identified. In this case, it is used the \textit{UrbanSound8K} dataset \cite{Salamon:UrbanSound:ACMMM:14}.
 
 \subsection{Data analysis}
 \label{subsec:mono_analysis}
@@ -122,13 +122,13 @@ Moreover, the recordings have different properties since they come from \url{www
 	\label{fig:mono_duration}
 \end{figure}
 
-The main differences are in bit depth, from 4 to 32 bit, the majority with 16 bit; and in the sample rate, from 8 KHz to 192 KHz, with the majority with 44.1 KHz. This may be a concern since some audio have a poor quality which can translate in poorer feature w.r.t. the other tracks. All these differences will be equalized during the feature extraction phase.
+The main differences are in bit depth, from 4 to 32 bit, the majority with 16 bit; and in the sample rate, from 8 KHz to 192 KHz, with the majority with 44.1 KHz. This may be a concern since some audio have a poor quality which can translate in poorer feature w.r.t. the other tracks. All these differences will be equalized during the data preprocessing phase.
 
-\subsection{Feature Extraction}
+\subsection{Data pre-processing}
 \label{subsec:mono_feature}
 
 This phase adopts librosa \cite{mcfee2015librosa}, which is a sound processing library for python. Its use helps to deal with different audio characteristics since by default librosa converts audio to 22 KHz sampling rate and 16 bit depth. Since the majority of audio recordings are at 44.1 KHz, it may seem that down sampling may reduce audio quality, but if we visualize the sound with a spectrogram, it will be clear that most of frequency content is distributed well below the 11 KHz (which is the maximum frequency a 22 KHz sampling rate can process), so in this case it reduces the dimension of the data without losing much information. For what concerns the bit depth, the majority of recordings are already at 16 bit, so it does not change much the data. Audio file are loaded and transformed into array series by \textit{load} function, which is also responsible of audio conversion and standardization.\newline
-The reference paper \cite{drossos2020sound} uses Mel Frequency Cepstral Coefficients (MFCC) to extract features from the array sound data. MFCCs are a way of measuring the rate of information change in spectral bands and storing it in coefficients; moreover, the rate of change is modeled in a non linear way since the Mel band is logarithmic and the adoption of this band is able to capture the rate of change in a similar way to what the human hear does \cite{MFCC}. \newline
+The reference paper \cite{drossos2020sound} uses Mel Frequency Cepstral Coefficients (MFCC) to transform the audio array in something the network can learn from. MFCCs are a way of measuring the rate of information change in spectral bands and storing it in coefficients; moreover, the rate of change is modeled in a non linear way since the Mel band is logarithmic and the adoption of this band is able to capture the rate of change in a similar way to what the human hear does \cite{MFCC}. \newline
 The idea is to extract the MFCC with the basic settings and change just the number of feature extracted per frame to 40 to adapt it to reference paper \cite{drossos2020sound}. The principal basic setting is using a window of 2048 bit for the Fast Fourier Transform inside the MFCC extractor, the other settings are of minor importance in this case. The correspondence between the window and a temporal interval is given by the following formula: 
  
 \begin{equation} \label{eq:window_interval}
@@ -147,7 +147,7 @@ Each model accepts an input of the following form: the first dimension is time, 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{./images/mono/baseline2.png}	
+	\includegraphics[width=0.9\textwidth]{./images/mono/baseline.png}	
 	\caption{Baseline model for monophonic SED}
 	\label{fig:mono_baseline}
 \end{figure}
@@ -157,7 +157,7 @@ The proposed approach substitutes the convolutional layers with depth-wise separ
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{./images/mono/new_model.png}	
+	\includegraphics[width=0.9\textwidth]{./images/mono/new_model.png}	
 	\caption{Proposed model for monophonic SED}
 	\label{fig:mono_new_model}
 \end{figure}
@@ -169,7 +169,7 @@ The proposed approach substitutes the convolutional layers with depth-wise separ
 \section{Polyphonic SED}
 \label{sec:poly}
 
-Polyphonic SED, instead, is more complicate: the idea is to have recordings with multiple overlapping sounds and to detect correctly the category of each single sound and the instants when the sound starts and ends (the maximum polyphony is 5). The dataset used is \textit{TUT-SED Synthetic 2016} \cite{Cakir_2017}, which is a synthetic dataset, while the section \ref{sec:mono} dataset is composed by recordings in real spaces and not modified in any way. Details on how the dataset has been created can be found at \url{https://webpages.tuni.fi/arg/paper/taslp2017-crnn-sed/tut-sed-synthetic-2016}.
+Polyphonic SED, instead, is more complicate: the idea is to have recordings with multiple overlapping sounds and to detect correctly the category of each single sound and the instants when the sound starts and ends (the maximum polyphony is 5). The dataset used is \textit{TUT-SED Synthetic 2016} \cite{Cakir_2017}, which is a synthetic dataset, while the section \ref{sec:mono} dataset is composed by recordings in real spaces not modified in any way. Details on how the dataset has been created can be found at \url{https://webpages.tuni.fi/arg/paper/taslp2017-crnn-sed/tut-sed-synthetic-2016}.
 
 \subsection{Data analysis}
 \label{subsec:poly_analysis}
@@ -180,7 +180,7 @@ The dataset is composed by 100 long sound recordings (about some minutes) contai
 	\begin{center}
 		\begin{tabular}{ |c | c | }
 			\hline
-			Label 				& number of elements \\ 
+			Label 				& \makecell{number of\\ elements} \\ 
 			\hline
 			footsteps 			& 8302 \\
 			\hline
@@ -197,6 +197,11 @@ The dataset is composed by 100 long sound recordings (about some minutes) contai
 			crowd\_applause 	& 1400 \\
 			\hline
 			cat\_meowing 		& 885 \\
+			\hline
+		\end{tabular}
+		\begin{tabular}{ |c | c | }
+			\hline
+			Label 				& \makecell{number of\\ elements} \\ 
 			\hline
 			motorcycle 			& 824 \\
 			\hline
@@ -220,18 +225,19 @@ The dataset is composed by 100 long sound recordings (about some minutes) contai
 	\end{center}
 \end{table}
 
-From the table, it is easily visible that classes are not distributed equally, moreover they have different duration, for example \textit{rain} is a class with rather long duration while \textit{horsewalk} contains very small duration events. As a rule of thumb of this dataset, one can enounce that the longer the duration the smaller the number of appearances, and vice versa. An histogram of audio lengths distribution can be found in figure \ref{fig:poly_duration}; this confirms the rule of thumb.
+From the table, it is easily visible that classes are not distributed equally, moreover they have different duration, for example \textit{rain} is a class with rather long duration while \textit{horsewalk} contains very small duration events. 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{./images/poly/duration.png}	
+	\includegraphics[width=0.7\textwidth]{./images/poly/duration.png}	
 	\caption{Decision trees assembly only confusion matrix}
 	\label{fig:poly_duration}
 \end{figure}
 
+As a rule of thumb of this dataset, one can enounce that the longer the duration the smaller the number of appearances, and vice versa. An histogram of audio lengths distribution can be found in figure \ref{fig:poly_duration}; this confirms the rule of thumb.\newline
 Since the dataset is synthetic, audio properties are unique for all the mixtures: single channel, 32 bit depth and 44.1 KHz sampling rate.
 
-\subsection{Feature Extraction}
+\subsection{Data pre-processing}
 \label{subsec:poly_feature}
 
 This case will use the same technique of monophonic SED in section \ref{subsec:mono_feature}: the audio is loaded and transformed to 16 bit depth and 22 KHz sampling rate, this is done to reduce the dimensionality of processed data and speed up computation at cost of small losses of audio quality.\newline
@@ -246,24 +252,27 @@ Since here we are dealing with polyphonic SED, the data labeling is more complex
 \subsection{Model formulation}
 \label{subsec:poly_model}
 
-This section will explain multiple model architecture introduced for poly SED: a baseline, a dilated baseline, a dessed baseline and a dessed-dilated approach (\textit{dessed stands for depth-wise separable convolution based model}). Each model has input of 1024 time frame times 40 features times 1 channel and outputs a 1024 time frame by 16 classes matrix.\newline
-The baseline model is similar to the one used in section \ref{subsec:mono_model}, but the GRU is configured to give back also the time frame and not only the features. Other different parameters are the activation function of dense layer, a \textit{sigmoid}, the loss function, \textit{binary cross-entropy}, and the metric, \textit{binary accuracy}. A representation can be found in fig. \ref{fig:poly_baseline}.
+This section will explain multiple model architecture introduced for poly SED: a baseline, a dilated baseline, a dessed baseline and a dessed-dilated approach (\textit{dessed stands for depth-wise separable convolution based model}). Each model has input of 1024 time frame by 40 features by 1 channel and outputs a 1024 time frame by 16 classes matrix.\newline
+The baseline model is similar to the one used in section \ref{subsec:mono_model}, but the GRU is configured to give back also the time frames and not only the features. Other different parameters are the activation function of dense layer, a \textit{sigmoid}, the loss function, \textit{binary cross-entropy}, and the metric, \textit{binary accuracy}. A representation can be found in fig. \ref{fig:poly_baseline}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{./images/poly/baseline.png}	
+	\includegraphics[width=0.9\textwidth]{./images/poly/baseline.png}	
 	\caption{Baseline model for polyphonic SED}
 	\label{fig:poly_baseline}
 \end{figure}
 
-The dilated baseline substitutes the recurrent neural network with a dilated convolution: the block comprehend a dilated convolution, batch normalization, max pooling and dropout; it is followed by a 1x1 convolution with (1,3) stride since the original paper \cite{drossos2020sound} uses a dilated convolution directly with stride (1,3) but the framework used in this project (keras) does not allow to specify both dilation and stride different from 1, so I though that a possible solution to overcome that could have been to use the 1x1 convolution with (1,3) stride. All other unspecified parameters are unchanged and equal to baseline model. The adoption of dilated convolutions allows to model log temporal context, reduce parameters number and eliminate the dissolving gradient for longer temporal sequences. Fig. \ref{fig:poly_dilated} contains a representation of this model.
+The dilated baseline substitutes the recurrent neural network with a dilated convolution: the block comprehend a dilated convolution, batch normalization, max pooling and dropout; it is followed by a 1x1 convolution with (1,3) stride since the original paper \cite{drossos2020sound} uses a dilated convolution directly with stride (1,3) but the framework used in this project (keras) does not allow to specify both dilation and stride different from 1, so I though that a possible solution to overcome that could have been to use the 1x1 convolution with (1,3) stride. 
 
-\begin{figure}[t]
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{./images/poly/dilated.png}	
+	\includegraphics[width=0.82\textwidth]{./images/poly/dilated.png}	
 	\caption{Dilated baseline model for polyphonic SED}
 	\label{fig:poly_dilated}
 \end{figure}
+
+All other unspecified parameters are unchanged and equal to baseline model. The adoption of dilated convolutions allows to model long temporal context, reduce parameters number and eliminate the dissolving gradient for longer temporal sequences. Fig. \ref{fig:poly_dilated} contains a representation of this model.\newline
+The dessed baseline substitutes the convolutional layers with depth-wise separable convolutions; all other operations and parameters are equal to the baseline. This substitution allows to drastically reduce the amount of used parameters in the firsts layers. It is possible to see a representation of the model in fig. \ref{fig:poly_dessed}.
 
 \begin{figure}[H]
 	\centering
@@ -272,16 +281,16 @@ The dilated baseline substitutes the recurrent neural network with a dilated con
 	\label{fig:poly_dessed}
 \end{figure}
 
-The dessed baseline substitutes the convolutional layers with depth-wise separable convolutions; all other operations and parameters are equal to the baseline. This substitution allows to drastically reduce the amount of used parameters in the firsts layers. It is possible to see a representation of the model in fig. \ref{fig:poly_dessed}.\newline
-The combination of dessed and dilated model is what the reference paper \cite{drossos2020sound} proposes as new approach to polyphonic SED, which theoretically should decrement the total number of parameters of about 7 times and give better prediction. During the training phase I had to propose a modification of the dilated part since the 1x1 convolution block does not work well in cooperation with depth-wise separable convolution so I adopted a max pooling operation with kernel and stride of dimension (1,3) and this gives satisfying results. A representation can be found in fig. \ref{fig:poly_new_model}.
+The combination of dessed and dilated model is what the reference paper \cite{drossos2020sound} proposes as new approach to polyphonic SED, which theoretically should decrement the total number of parameters of about 7 times and give better prediction.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{./images/poly/new model.png}	
+	\includegraphics[width=0.8\textwidth]{./images/poly/new model.png}	
 	\caption{Proposed model for polyphonic SED}
 	\label{fig:poly_new_model}
 \end{figure}
 
+During the training phase I had to propose a modification of the dilated part since the 1x1 convolution block does not work well in cooperation with depth-wise separable convolution so I adopted a max pooling operation with kernel and stride of dimension (1,3) and this gives satisfying results. A representation can be found in fig. \ref{fig:poly_new_model}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 4
