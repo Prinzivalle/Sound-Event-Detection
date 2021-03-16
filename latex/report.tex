@@ -248,7 +248,7 @@ Extracted data are then subdivided in sub-vectors of features composed by 1024 t
 \subsection{Data labeling}
 \label{subsec:poly_label}
 
-Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results.
+Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results. This means that it is not good to rely only on accuracy since the dataset is highly unbalanced, so authors of \cite{drossos2020sound} propose to use f-score.
 
 \subsection{Model formulation}
 \label{subsec:poly_model}
@@ -258,7 +258,7 @@ The baseline model is similar to the one used in section \ref{subsec:mono_model}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{./images/poly/baseline.png}	
+	\includegraphics[width=0.8\textwidth]{./images/poly/baseline.png}	
 	\caption{Baseline model for polyphonic SED}
 	\label{fig:poly_baseline}
 \end{figure}
@@ -267,7 +267,7 @@ The dilated baseline substitutes the recurrent neural network with a dilated con
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.82\textwidth]{./images/poly/dilated.png}	
+	\includegraphics[width=0.8\textwidth]{./images/poly/dilated.png}	
 	\caption{Dilated baseline model for polyphonic SED}
 	\label{fig:poly_dilated}
 \end{figure}
@@ -390,6 +390,8 @@ It must be said that the proposed model was developed for polyphonic SED, so may
 \subsection{Polyphonic results}
 \label{subsec:poly_results}
 
+Baseline model performs good: it trains for a small number of epochs, just 62, and learns very fast, getting a test accuracy of 0.962 and test loss of 0.135. From fig. \ref{fig:poly_base_result}, it can be seen that this model present a visible overfit after about 20 epochs, the best model is taken from epoch 32 so it is the best combination between generalization and overfitting of this case. 
+
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{.5\textwidth}
@@ -408,6 +410,9 @@ It must be said that the proposed model was developed for polyphonic SED, so may
 	\label{fig:poly_base_result}
 \end{figure}
 
+F1-score has been computed manually on a micro averaging measure; in this case it is 0.715, higher w.r.t. what achieved in \cite{drossos2020sound}. Training requires half an hour in this case.\newline 
+The adoption of dilated convolution allows the model to be trained for a higher number of epochs, 136, achieving better accuracy and loss w.r.t. the baseline model, 0.966 and 0.115 respectively. The training curves are a bit more noisier than baseline ones, as reported in fig \ref{fig:poly_dil_result}.
+
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{.5\textwidth}
@@ -425,6 +430,8 @@ It must be said that the proposed model was developed for polyphonic SED, so may
 	\caption{Dilated model training graphs}
 	\label{fig:poly_dil_result}
 \end{figure}
+
+Overall f1-score is 0.7299 and it is the best value achieved in the polyphonic results. The model has been trained for 7 hours and a half.\newline
 
 \begin{figure}[H]
 	\centering
