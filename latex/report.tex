@@ -272,8 +272,7 @@ The dilated baseline substitutes the recurrent neural network with a dilated con
 	\label{fig:poly_dilated}
 \end{figure}
 
-All other unspecified parameters are unchanged and equal to baseline model. The adoption of dilated convolutions allows to model long temporal context, reduce parameters number and eliminate the dissolving gradient for longer temporal sequences. Fig. \ref{fig:poly_dilated} contains a representation of this model.\newline
-The dessed baseline substitutes the convolutional layers with depth-wise separable convolutions; all other operations and parameters are equal to the baseline. This substitution allows to drastically reduce the amount of used parameters in the firsts layers. It is possible to see a representation of the model in fig. \ref{fig:poly_dessed}.
+Different values of kernel and dilation has been proposed in \cite{drossos2020sound}, I have chosen a 3x3 kernel with 10 as time dilation rate since it seemed a good compromise. Before executing the dilated convolution, input is padded on temporal dimension only of a value equal to the dilation rate to obtain an untouched temporal dimension as output of convolutional layer. All other unspecified parameters are unchanged and equal to baseline model. The adoption of dilated convolutions allows to model long temporal context, reduce parameters number and eliminate the dissolving gradient for longer temporal sequences. Fig. \ref{fig:poly_dilated} contains a representation of this model.
 
 \begin{figure}[H]
 	\centering
@@ -282,16 +281,16 @@ The dessed baseline substitutes the convolutional layers with depth-wise separab
 	\label{fig:poly_dessed}
 \end{figure}
 
-The combination of dessed and dilated model is what the reference paper \cite{drossos2020sound} proposes as new approach to polyphonic SED, which theoretically should decrement the total number of parameters of about 7 times and give better prediction.
+The dessed baseline substitutes the convolutional layers with depth-wise separable convolutions; all other operations and parameters are equal to the baseline. This substitution allows to drastically reduce the amount of used parameters in the firsts layers. It is possible to see a representation of the model in fig. \ref{fig:poly_dessed}.
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images/poly/new model.png}	
+	\includegraphics[width=0.9\textwidth]{./images/poly/new model.png}	
 	\caption{Proposed model for polyphonic SED}
 	\label{fig:poly_new_model}
 \end{figure}
 
-During the training phase I had to propose a modification of the dilated part since the 1x1 convolution block does not work well in cooperation with depth-wise separable convolution so I adopted a max pooling operation with kernel and stride of dimension (1,3) and this gives satisfying results. A representation can be found in fig. \ref{fig:poly_new_model}.
+The combination of dessed and dilated model is what the reference paper \cite{drossos2020sound} proposes as new approach to polyphonic SED, which theoretically should decrement the total number of parameters of about 7 times and give better prediction. During the training phase I had to propose a modification of the dilated part since the 1x1 convolution block does not work well in cooperation with depth-wise separable convolution so I adopted a max pooling operation with kernel and stride of dimension (1,3) and this gives satisfying results. A representation can be found in fig. \ref{fig:poly_new_model}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 4
