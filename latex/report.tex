@@ -33,6 +33,7 @@
 \usepackage{pdflscape} % required for table rotation
 \usepackage{array, makecell} % for multiline cells of table
 \usepackage{breakurl} % for breaking url link 
+\usepackage{subcaption} % for figure side by side
 %\usepackage{tabularx}
 %\newcolumntype{L}{>{\raggedright\arraybackslash}X}
 
@@ -299,11 +300,186 @@ During the training phase I had to propose a modification of the dilated part si
 \section{Experimental Results}
 \label{sec:results}
 
+This section contains the practical results achieved training the models and testing them. Both dataset has been divided as follows: 60\% for training, 20\% for validation and the remaining 20\% as test. Model has been trained looking at validation loss: the model with lowest value is saved and the training is stopped when the monitored value has not decreased for longer than 30 epochs.
+
 \subsection{Monophonic results}
 \label{subsec:mono_results}
 
+Baseline model performs well overall: it has been trained for 159 epochs, a total of 5 hours and a half. Training graphs showing accuracy and loss both on train and validation set are in fig. \ref{fig:mono_base_result}. Graphs show a very strange behavior since learning does not create, in this case, smooth functions, but curves are instead with many hop and gaps in th values between different epochs. 
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/mono/baseline_acc.png}
+		\caption{Accuracy}
+		%\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/mono/baseline_loss.png}
+		\caption{Loss}
+		%\label{fig:sub2}
+	\end{subfigure}
+	\caption{Baseline training graphs}
+	\label{fig:mono_base_result}
+\end{figure}
+
+This model achieved an overall accuracy of 0.824; differently from what it has been said in section \ref{subsec:mono_analysis}, the classes with lowest number of elements are not the ones with lowest f1-score, probably that is caused by some difficulties which depends on sound properties primarily and not on class population. Tab \ref{tab:mono_base_f1} contains values of f1-score for each class for values tested on baseline model. The value of loss function, instead, goes down till 0.521, and it's the lowest value recorded during training; on test set it is 0.524. 
+
+\begin{table}[h]
+	\begin{center}
+		\scalebox{0.9}{
+		\begin{tabular}{ |c | c | }
+			\hline
+			Label 				& f1-score \\ 
+			\hline
+			air\_conditioner 	& 0.921        \\
+			\hline
+			car\_horn 			& 0.857         \\
+			\hline
+			children\_playing 	& 0.706        \\
+			\hline
+			dog\_bark 			& 0.759        \\
+			\hline
+			drilling 			& 0.788        \\
+			\hline
+		\end{tabular}
+		\begin{tabular}{ |c | c | }
+			\hline
+			Label 				& f1-score \\ 
+			\hline
+			engine\_idling 		& 0.905 \\
+			\hline
+			gun\_shot 			& 0.813  \\
+			\hline
+			jackhammer 			& 0.866        \\
+			\hline
+			siren 				& 0.880        \\
+			\hline
+			street\_music 		& 0.780        \\
+			\hline
+		\end{tabular}
+		}
+		\caption{Monophonic baseline f1-score per class}
+		\label{tab:mono_base_f1}
+	\end{center}
+\end{table}
+
+For what concerns the proposed model, it does not adapt well to the monophonic SED and performs very poorly. Figure \ref{fig:mono_new_result} contains accuracy and loss graphs recorded during training: also in this case the curve are not so smooth, but the overall performance is not comparable with baseline. Accuracy on test set is 0.263 and loss is 2.04, which are bad results compared with baseline. Moreover, this model has trained for a lower amount of epoch (39) due to the loss value not decreasing after 30 epochs; looking at the graphs, maybe changing the value to 40 epochs may have continued the training with better results but I suppose that overall results would not have been comparable with baseline model.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/mono/new_model_acc.png}
+		\caption{Accuracy}
+		%\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/mono/new_model_loss.png}
+		\caption{Loss}
+		%\label{fig:sub2}
+	\end{subfigure}
+	\caption{Proposed model training graphs}
+	\label{fig:mono_new_result}
+\end{figure}
+
+It must be said that the proposed model was developed for polyphonic SED, so maybe it's the fault of adaptation proposed and better model can be proposed to overcome the bad result of this model. I suppose the part causing this poor results is the connection between the dilated convolution and the dense layer: two ideas arises, or the dilated convolution is not the right choice when it is needed just a label for each recording and not a multilabel, or the global average pool is not the right way to downscale from dilated convolution to dense layer.
+
 \subsection{Polyphonic results}
 \label{subsec:poly_results}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/baseline_acc.png}
+		\caption{Accuracy}
+		%\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/baseline_loss.png}
+		\caption{Loss}
+		%\label{fig:sub2}
+	\end{subfigure}
+	\caption{Baseline training graphs}
+	\label{fig:poly_base_result}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/dilated_acc.png}
+		\caption{Accuracy}
+		%\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/dilated_loss.png}
+		\caption{Loss}
+		%\label{fig:sub2}
+	\end{subfigure}
+	\caption{Dilated model training graphs}
+	\label{fig:poly_dil_result}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/dessed_acc.png}
+		\caption{Accuracy}
+		%\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/dessed_loss.png}
+		\caption{Loss}
+		%\label{fig:sub2}
+	\end{subfigure}
+	\caption{Dessed model training graphs}
+	\label{fig:poly_des_result}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/new model_acc.png}
+		\caption{1x1 convolution}
+		%\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/new model_acc_new.png}
+		\caption{Max pooling}
+		%\label{fig:sub2}
+	\end{subfigure}
+	\caption{Proposed model accuracy comparison}
+	\label{fig:poly_new_acc}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/new model_loss.png}
+		\caption{1x1 convolution}
+		%\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.95\linewidth]{./images/poly/new model_loss_new.png}
+		\caption{Max pooling}
+		%\label{fig:sub2}
+	\end{subfigure}
+	\caption{Proposed model loss comparison}
+	\label{fig:poly_new_loss}
+\end{figure}
 
 %----------------------------------------------------------------------------------------
 %	SECTION 5
