@@ -432,6 +432,7 @@ The adoption of dilated convolution allows the model to be trained for a higher 
 \end{figure}
 
 Overall f1-score is 0.7299 and it is the best value achieved in the polyphonic results. The model has been trained for 7 hours and a half.\newline
+The introduction of depth-wise separable convolutions allows to reduce drastically the number of parameters needed by the model and test accuracy does not change so much, 0.953, and 0.152 for test loss. The model has been trained for 88 epochs for a total of an hour. The model gives rise to a tiny overfit with growing epochs, but paltry compared to what happened with baseline model. Training history graphs can be found in fig. \ref{fig:poly_des_result}.
 
 \begin{figure}[H]
 	\centering
@@ -450,6 +451,8 @@ Overall f1-score is 0.7299 and it is the best value achieved in the polyphonic r
 	\caption{Dessed model training graphs}
 	\label{fig:poly_des_result}
 \end{figure}
+
+Overall the model loses about 0.1 point of f1-score, 0.633, which is enough to say that the baseline is better considering the score but the number of parameters is lower in this new approach. \newline
 
 \begin{figure}[H]
 	\centering
