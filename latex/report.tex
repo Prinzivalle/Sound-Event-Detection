@@ -299,7 +299,7 @@ The combination of dessed and dilated model is what the reference paper \cite{dr
 \section{Experimental Results}
 \label{sec:results}
 
-This section contains the practical results achieved training the models and testing them. Both dataset has been divided as follows: 60\% for training, 20\% for validation and the remaining 20\% as test. Model has been trained looking at validation loss: the model with lowest value is saved and the training is stopped when the monitored value has not decreased for longer than 30 epochs.
+This section contains the practical results achieved training the models and testing them. Both dataset has been divided as follows: 60\% for training, 20\% for validation and the remaining 20\% as test. Model has been trained looking at validation loss: the model with lowest value is saved and the training is stopped when the monitored value has not decreased for longer than 30 epochs. Train is performed with batch size of 16 where possible or 8 if memory is not enough.
 
 \subsection{Monophonic results}
 \label{subsec:mono_results}
@@ -494,8 +494,34 @@ The other alternative used, is to adopt a  max pooling layer with (1,3) dimensio
 \end{figure}
 
 Even if the f1-score is much different, both new models have a similar training time around 3 hours and a half.\newline
+Table \ref{tab:poly_results} sums up the polyphonic results: the best performing model is the dilated one, where only the recurrent layer is substituted, but the advancement w.r.t. the baseline, 0.015 of f1-score, does not justify the 15 times more time needed for training. The adoption of depth-wise separable convolution allows to drastically reduce the number of parameters and the dimension of the model but the f1-score looses about 0.1 w.r.t. the baseline and it is needed 6 times more for training. Basically, the new approaches allow to obtain a smaller model with slightly decreased performances that are well suited for deployment on machines which have limited resources (86\% dimension reduction with 14\% performance loss).  
 
-%TODO ADD COMPARISON ON DIMENSION AND F1 AS A TABLE
+\begin{table}[H]
+	\begin{center}
+		\resizebox{0.99\textwidth}{!}{
+		\begin{tabular}{ |c | c | c | c | c | c | c | }
+			\hline
+			Model 		& Accuracy 	& Loss 		& \makecell{Training \\ time} & f1-score & \makecell{Number of \\ parameters} & Dimension\\ 
+			\hline
+			Baseline 	& 0.962 	& 0.1356 	& 0:32	& 0.71566 	& 3.7M 	& 43 KB\\
+			\hline
+			Dilated 	& 0.966		& 0.115		& 7:30 	& 0.7299  	& 3.7M	& 43 KB\\
+			\hline
+			Dessed 		& 0.9532	& 0.1524	& 0:59 	& 0.6332	& 0.5M	& 6.5 KB \\
+			\hline
+			\makecell{Proposed Model \\ 1x1 Convolution} 	& 0.9287	& 0.241	& 3:14	& 0.1245 & 0.5M & 6 KB \\
+			\hline
+			\makecell{Proposed Model \\ avg pooling} 		& 0.9523 	& 0.148 & 3:26	& 0.6281 & 0.5M & 6 KB \\
+			\hline
+			
+			\hline
+		\end{tabular}}
+		\caption{Polyphonic model results}
+		\label{tab:poly_results}
+	\end{center}
+\end{table}
+
+The obtained results are slightly different to \cite{drossos2020sound}: the baseline and dilated perform about 0.1 higher of f1-score in this case, while dessed and proposed model are in line with reference paper but have a limited amount of parameter lower (0.5M vs 0.7M).
 
 %----------------------------------------------------------------------------------------
 %	SECTION 5
