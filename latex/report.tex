@@ -522,7 +522,7 @@ Even if the f1-score is much different, both new models have a similar training 
 \end{table}
 
 Table \ref{tab:poly_results} sums up the polyphonic results: the best performing model is the dilated one, where only the recurrent layer is substituted, but the advancement w.r.t. the baseline, 0.015 of f1-score, does not justify the 15 times more time needed for training. The adoption of depth-wise separable convolution allows to drastically reduce the number of parameters and the dimension of the model but the f1-score looses about 0.1 w.r.t. the baseline and it is needed 6 times more for training. Basically, the new approaches allow to obtain a smaller model with slightly decreased performances that are well suited for deployment on machines which have limited resources (86\% dimension reduction with 14\% performance loss).  \newline
-The obtained results are slightly different to \cite{drossos2020sound}: the baseline and dilated perform about 0.1 higher of f1-score in this case, while dessed and proposed model are in line with reference paper but have a limited amount of parameter lower (0.5M vs 0.7M).
+The obtained results are slightly different to \cite{drossos2020sound}: the baseline and dilated perform about 0.1 higher of f1-score in this case, while dessed and proposed model are in line with reference paper but have a smaller amount of parameter  (0.5M vs 0.7M) probably due to the different framework used in original paper (pytorch).
 
 %----------------------------------------------------------------------------------------
 %	SECTION 5
@@ -534,12 +534,12 @@ The obtained results are slightly different to \cite{drossos2020sound}: the base
 Since my machine has a gaming AMD GPU, I decided to try finding a way to train models on it. There exists different ways to do it: 
 
 \begin{itemize}
-	\item ROCm \cite{rocm} is an open platform GPU compiler which is capable of running deep learning framework on top of it but my GPU is not supported by this.
-	\item PlaidML \cite{Plaid} is a tensor compiler running as back-end of common frameworks. It works well with Keras but has the drawback that Keras does not support back-end different from TensorFlow starting from version 2.4 and it was refactored from version 2.2.5 so PlaidML allows to work with Keras 2.2.4, which is not the leading edge version but all the things needed by this project work well with this project.
-	\item DirectML \cite{directML} is a back-end developed by Microsoft which supports TensorFlow on not CUDA GPUs till version 1.15, which is the last version till the big refactor which brought version 2.0. 
+	\item ROCm \cite{rocm} is an open platform GPU compiler developed by AMD, which is capable of running deep learning framework on top of it but my GPU is still not supported.
+	\item PlaidML \cite{Plaid} is a tensor compiler running as back-end of common frameworks. It works well with Keras but has the drawback that Keras does not support back-end different from TensorFlow starting from version 2.4 and it was refactored from version 2.2.5 so PlaidML allows to work with Keras 2.2.4, which is not the leading edge version but all the things needed by this project work well.
+	\item DirectML \cite{directML} is a back-end developed by Microsoft which supports TensorFlow version 1.x on not CUDA GPUs, latest supported version is 1.15, which is the last one till the big refactor which brought version 2.0. 
 \end{itemize}
 
-So both alternatives use old version but the PlaidML one seems more promising since Keras code written for version 2.2.4 is completely usable by newer version: the code has been tested both on local machine with PlaidML as back-end both on Colab with newer Keras version and TensorFlow as back-end.\newline
+So both alternatives use old versions but the PlaidML one seems more promising since Keras code written for version 2.2.4 is completely usable by newer version: the code has been tested both on local machine with PlaidML as back-end both on Colab with newer Keras version and TensorFlow as back-end and worked without problems.\newline
 Later this year, both frameworks are working on bigger updates: DirectML is working on bringing support for TensorFlow 2.x, while PlaidML is working on integrating MLIR, a new compiler, which has been integrated also by TensorFlow last years so in the end also PlaidML will support TensorFlow 2.x exploiting MLIR as abstraction layer with TF.
 
 %----------------------------------------------------------------------------------------
@@ -549,6 +549,9 @@ Later this year, both frameworks are working on bigger updates: DirectML is work
 \section{Conclusions}
 \label{sec:end}
 
+Different approaches for Sound Event Detection have been proposed in this work: for monophonic SED, the baseline works good while the new approach has some problems and needs some improvements to be competitive; for polyphonic SED, four different approaches have been proposed with very good results, maybe the best approach is the baseline if one has small amount of time to train the model but has enough space for storing the model, while both dessed and dessed-dilated have a small decrement in performance but huge decrement in model dimension.\newline
+Even if the code has been developed for an old version of Keras, it is completely compatible with newer version, as shown by the fact that the model has been trained also on Colab with newest libraries versions.\newline
+Overall it has been a very good learning experience, and I am satisfied by the work.  
 
 %----------------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
