@@ -245,16 +245,24 @@ This case will use the same technique of monophonic SED in section \ref{subsec:m
 MFCCs are extracted with different parameters in this case: the number of feature per frame is 40, with 40 mel bands, 20 ms window and 50 \% overlap. This means, using formula \ref{eq:window_interval}, that it is necessary to use 440 bit per window and 220 for the hop length since it is required a 50 \% overlap (this means that the following frame extracted starts at half of the preceding frame).\newline
 Extracted data are then subdivided in sub-vectors of features composed by 1024 time frames: this is done to create an equal input for the neural network and enlarge the input data, instead of having less vectors of greater length. Moreover, this allows to standardize the input dimension in an easy way, since at most it is required to pad 1023 frames, while processing each extracted vector without subdivision would have brought bigger padding and much wasted computational power.
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{./images/poly/processed_example.png}	
+	\caption{Baseline model for polyphonic SED}
+	\label{fig:poly_processed}
+\end{figure}
+
+Fig. \ref{fig:poly_processed} contains an example of visualization of processed data and associated labels: the upper part of the image contains a visualization of what the audio file looks like in Mel Spectral band, from which the MFCCs are extracted to fed the network. The lower part is labeling associated to the audio file: the black parts are where the category on the left is present in the audio file, a complete white plot means that he category is not present at all in the file. Labeling procedure will be explained in following section, \ref{subsec:poly_label}.
+
 \subsection{Data labeling}
 \label{subsec:poly_label}
 
-Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results. This means that it is not good to rely only on accuracy since the dataset is highly unbalanced, so authors of \cite{drossos2020sound} propose to use f-score.
+Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results. This means that it is not good to rely only on accuracy since the dataset is highly unbalanced, so authors of \cite{drossos2020sound} propose to use f-score. This fact can be easily recognized in lower part of figure \ref{fig:poly_processed}.
 
 \subsection{Model formulation}
 \label{subsec:poly_model}
 
-This section will explain multiple model architecture introduced for poly SED: a baseline, a dilated baseline, a dessed baseline and a dessed-dilated approach (\textit{dessed stands for depth-wise separable convolution based model}). Each model has input of 1024 time frame by 40 features by 1 channel and outputs a 1024 time frame by 16 classes matrix.\newline
-The baseline model is similar to the one used in section \ref{subsec:mono_model}, but the GRU is configured to give back also the time frames and not only the features. Other different parameters are the activation function of dense layer, a \textit{sigmoid}, the loss function, \textit{binary cross-entropy}, and the metric, \textit{binary accuracy}. A representation can be found in fig. \ref{fig:poly_baseline}.
+This section will explain multiple model architecture introduced for poly SED: a baseline, a dilated baseline, a dessed baseline and a dessed-dilated approach (\textit{dessed stands for depth-wise separable convolution based model}). Each model has input of 1024 time frame by 40 features by 1 channel and outputs a 1024 time frame by 16 classes matrix.
 
 \begin{figure}[H]
 	\centering
@@ -263,34 +271,34 @@ The baseline model is similar to the one used in section \ref{subsec:mono_model}
 	\label{fig:poly_baseline}
 \end{figure}
 
-The dilated baseline substitutes the recurrent neural network with a dilated convolution: the block comprehend a dilated convolution, batch normalization, max pooling and dropout; it is followed by a 1x1 convolution with (1,3) stride since the original paper \cite{drossos2020sound} uses a dilated convolution directly with stride (1,3) but the framework used in this project (keras) does not allow to specify both dilation and stride different from 1, so I though that a possible solution to overcome that could have been to use the 1x1 convolution with (1,3) stride. 
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\textwidth]{./images/poly/dilated.png}	
-	\caption{Dilated baseline model for polyphonic SED}
-	\label{fig:poly_dilated}
-\end{figure}
-
+The baseline model is similar to the one used in section \ref{subsec:mono_model}, but the GRU is configured to give back also the time frames and not only the features. Other different parameters are the activation function of dense layer, a \textit{sigmoid}, the loss function, \textit{binary cross-entropy}, and the metric, \textit{binary accuracy}. A representation can be found in fig. \ref{fig:poly_baseline}.\newline
+The dilated baseline substitutes the recurrent neural network with a dilated convolution: the block comprehend a dilated convolution, batch normalization, max pooling and dropout; it is followed by a 1x1 convolution with (1,3) stride since the original paper \cite{drossos2020sound} uses a dilated convolution directly with stride (1,3) but the framework used in this project (keras) does not allow to specify both dilation and stride different from 1, so I though that a possible solution to overcome that could have been to use the 1x1 convolution with (1,3) stride. \newline
 Different values of kernel and dilation has been proposed in \cite{drossos2020sound}, I have chosen a 3x3 kernel with 10 as time dilation rate since it seemed a good compromise. Before executing the dilated convolution, input is padded on temporal dimension only of a value equal to the dilation rate to obtain an untouched temporal dimension as output of convolutional layer. All other unspecified parameters are unchanged and equal to baseline model. The adoption of dilated convolutions allows to model long temporal context, reduce parameters number and eliminate the dissolving gradient for longer temporal sequences. Fig. \ref{fig:poly_dilated} contains a representation of this model.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{./images/poly/dessed.png}	
-	\caption{Dessed baseline model for polyphonic SED}
-	\label{fig:poly_dessed}
+	\includegraphics[width=0.95\textwidth]{./images/poly/dilated.png}	
+	\caption{Dilated baseline model for polyphonic SED}
+	\label{fig:poly_dilated}
 \end{figure}
 
 The dessed baseline substitutes the convolutional layers with depth-wise separable convolutions; all other operations and parameters are equal to the baseline. This substitution allows to drastically reduce the amount of used parameters in the firsts layers. It is possible to see a representation of the model in fig. \ref{fig:poly_dessed}.
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{./images/poly/new model.png}	
-	\caption{Proposed model for polyphonic SED}
-	\label{fig:poly_new_model}
+	\includegraphics[width=0.95\textwidth]{./images/poly/dessed.png}	
+	\caption{Dessed baseline model for polyphonic SED}
+	\label{fig:poly_dessed}
 \end{figure}
 
 The combination of dessed and dilated model is what the reference paper \cite{drossos2020sound} proposes as new approach to polyphonic SED, which theoretically should decrement the total number of parameters of about 7 times and give better prediction. During the training phase I had to propose a modification of the dilated part since the 1x1 convolution block does not work well in cooperation with depth-wise separable convolution so I adopted a max pooling operation with kernel and stride of dimension (1,3) and this gives satisfying results. A representation can be found in fig. \ref{fig:poly_new_model}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.95\textwidth]{./images/poly/new model.png}	
+	\caption{Proposed model for polyphonic SED}
+	\label{fig:poly_new_model}
+\end{figure}
 
 %----------------------------------------------------------------------------------------
 %	SECTION 4
