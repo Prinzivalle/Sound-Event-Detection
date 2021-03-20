@@ -170,7 +170,7 @@ The proposed approach substitutes the convolutional layers with depth-wise separ
 \section{Polyphonic SED}
 \label{sec:poly}
 
-Polyphonic SED, instead, is more complicate: the idea is to have recordings with multiple overlapping sounds and to detect correctly the category of each single sound and the instants when the sound starts and ends (the maximum polyphony is 5). The dataset used is \textit{TUT-SED Synthetic 2016} \cite{Cakir_2017}, which is a synthetic dataset, while the section \ref{sec:mono} dataset is composed by recordings in real spaces not modified in any way. Details on how the dataset has been created can be found at \url{https://webpages.tuni.fi/arg/paper/taslp2017-crnn-sed/tut-sed-synthetic-2016}.
+Polyphonic SED, instead, is more complicate: the idea is to have recordings with multiple overlapping sounds and to detect correctly the category of each single sound and the instants when the sound starts and ends (the maximum polyphony is 5 in this case). The dataset used is \textit{TUT-SED Synthetic 2016} \cite{Cakir_2017}, which is a synthetic dataset, while the section \ref{sec:mono} dataset is composed by recordings in real spaces not modified in any way. Details on how the dataset has been created can be found at \url{https://webpages.tuni.fi/arg/paper/taslp2017-crnn-sed/tut-sed-synthetic-2016}.
 
 \subsection{Data analysis}
 \label{subsec:poly_analysis}
@@ -252,12 +252,12 @@ Extracted data are then subdivided in sub-vectors of features composed by 1024 t
 	\label{fig:poly_processed}
 \end{figure}
 
-Fig. \ref{fig:poly_processed} contains an example of visualization of processed data and associated labels: the upper part of the image contains a visualization of what the audio file looks like in Mel Spectral band, from which the MFCCs are extracted to fed the network. The lower part is labeling associated to the audio file: the black parts are where the category on the left is present in the audio file, a complete white plot means that he category is not present at all in the file. Labeling procedure will be explained in following section, \ref{subsec:poly_label}.
+Fig. \ref{fig:poly_processed} contains an example of visualization of processed data and associated labels: the upper part of the image contains a visualization of what the audio file looks like in Mel Spectral band, from which the MFCCs are extracted to fed the network. The lower part is labeling associated to the audio file: the black parts are where the category on the left is present in the audio file, a complete white plot means that the category is not present at all in the file. Labeling procedure will be explained in following section, \ref{subsec:poly_label}.
 
 \subsection{Data labeling}
 \label{subsec:poly_label}
 
-Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results. This means that it is not good to rely only on accuracy since the dataset is highly unbalanced, so authors of \cite{drossos2020sound} propose to use f-score. This fact can be easily recognized in lower part of figure \ref{fig:poly_processed}.
+Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results. This means that it is not good to rely only on accuracy since the dataset is highly unbalanced, so authors of \cite{drossos2020sound} propose to use f1-score. This fact can be easily recognized in lower part of figure \ref{fig:poly_processed}.
 
 \subsection{Model formulation}
 \label{subsec:poly_model}
@@ -313,7 +313,7 @@ Both dataset has been divided as follows: 60\% for training, 20\% for validation
 \subsection{Monophonic results}
 \label{subsec:mono_results}
 
-Baseline model performs well overall: it has been trained for 159 epochs, a total of 5 hours and a half. Training graphs showing accuracy and loss both on train and validation set are in fig. \ref{fig:mono_base_result}. Graphs show a very strange behavior since learning does not create, in this case, smooth functions, but curves are instead with many hop and gaps in th values between different epochs. 
+Baseline model performs well overall: it has been trained for 159 epochs, a total of 5 hours and a half. Training graphs showing accuracy and loss both on train and validation set are in fig. \ref{fig:mono_base_result}. Graphs show a very strange behavior since learning does not create, in this case, smooth functions, but curves are instead with many hop and gaps in the values between different epochs. 
 
 \begin{figure}[h]
 	\centering
@@ -544,7 +544,7 @@ Since my machine has a gaming AMD GPU, I decided to try finding a way to train m
 \begin{itemize}
 	\item ROCm \cite{rocm} is an open platform GPU compiler developed by AMD, which is capable of running deep learning framework on top of it but my GPU is still not supported.
 	\item PlaidML \cite{Plaid} is a tensor compiler running as back-end of common frameworks. It works well with Keras but has the drawback that Keras does not support back-end different from TensorFlow starting from version 2.4 and it was refactored from version 2.2.5 so PlaidML allows to work with Keras 2.2.4, which is not the leading edge version but all the things needed by this project work well.
-	\item DirectML \cite{directML} is a back-end developed by Microsoft which supports TensorFlow version 1.x on not CUDA GPUs, latest supported version is 1.15, which is the last one till the big refactor which brought version 2.0. 
+	\item DirectML \cite{directML} is a back-end developed by Microsoft which supports TensorFlow version 1.x on not CUDA GPUs, latest supported version is 1.15, which is the last one till the big refactor which brought version 2.0 of TF. 
 \end{itemize}
 
 So both alternatives use old versions but the PlaidML one seems more promising since Keras code written for version 2.2.4 is completely usable by newer version: the code has been tested both on local machine with PlaidML as back-end both on Colab with newer Keras version and TensorFlow as back-end and worked without problems.\newline
@@ -559,7 +559,7 @@ Later this year, both frameworks are working on bigger updates: DirectML is work
 
 Different approaches for Sound Event Detection have been proposed in this work: for monophonic SED, the baseline works good while the new approach has some problems and needs some improvements to be competitive; for polyphonic SED, four different approaches have been proposed with very good results, maybe the best approach is the baseline if one has small amount of time to train the model but has enough space for storing the model, while both dessed and dessed-dilated have a small decrement in performance but huge decrement in model dimension.\newline
 Even if the code has been developed for an old version of Keras, it is completely compatible with newer version, as shown by the fact that the model has been trained also on Colab with newest libraries versions.\newline
-Overall it has been a very good learning experience, and I am satisfied by the work.  
+Overall it has been a very good learning experience, and I am satisfied by the work produced. All the code related to this implementation can be found on my GitHub: \url{https://github.com/Prinzivalle/Xception}.
 
 %----------------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
