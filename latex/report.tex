@@ -66,7 +66,7 @@
 \section{Introduction}
 \label{sec:intro}
 
-This project is a study and implementation of a polyphonic sound event detection extracted from \cite{drossos2020sound}. It is also based on the baseline reference of \cite{drossos2020sound}, which is \cite{Cakir_2017}. These two works represent the main source of this project. Here there will be presented both a replication of the paper approach together with a monophonic sound event detection, since to obtain the original dataset took some time, the author thought to start working with another dataset and then move the work to the original dataset when it would have been available. Section \ref{sec:mono} and \ref{sec:poly} are organized as follows: first an analysis of the dataset is performed to better understand it, then it is explained how the data have been preprocessed and finally it is proposed a model to solve the problem. Section \ref{sec:results} regroups the results for both datasets, then it is explained a brief digression on how to train a neural network model on an AMD GPU on section \ref{sec:AMD} since the author's setup has only an AMD GPU. The work is ended by conclusions of section \ref{sec:end}.
+This project is a study and implementation of a polyphonic sound event detection extracted from \cite{drossos2020sound}. It is also based on the baseline reference of \cite{drossos2020sound}, which is \cite{Cakir_2017}. These two works represent the main source of this project. Here there will be presented both a replication of the paper approach together with a monophonic sound event detection, since to obtain the original dataset took some time, I thought to start working with another dataset and then move the work to the original dataset when it would have been available. Section \ref{sec:mono} and \ref{sec:poly} are organized as follows: first an analysis of the dataset is performed to better understand it, then it is explained how the data have been preprocessed and finally it is proposed a model to solve the problem. Section \ref{sec:results} regroups the results for both datasets, then it is explained a brief digression on how to train a neural network model on an AMD GPU on section \ref{sec:AMD} since my setup has only an AMD GPU. The work is ended by conclusions of section \ref{sec:end}.
  
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -75,7 +75,7 @@ This project is a study and implementation of a polyphonic sound event detection
 \section{Monophonic SED}
 \label{sec:mono}
 
-Monophonic Sound Event Detection consist of predicting a single class label for an audio recording: the record will likely contain some noise but it generally contains a single and remarkable sound to be identified. In this case, it is used the \textit{UrbanSound8K} dataset \cite{Salamon:UrbanSound:ACMMM:14}.
+Monophonic Sound Event Detection consists of predicting a single class label for an audio recording: the record will likely contain some noise but it generally contains a single and remarkable sound to be identified. In this case, it is used the \textit{UrbanSound8K} dataset \cite{Salamon:UrbanSound:ACMMM:14}.
 
 \subsection{Data analysis}
 \label{subsec:mono_analysis}
@@ -109,34 +109,34 @@ The dataset is composed by 8732 labelled small sound recordings (less than 4 sec
 			street\_music 		& 1000 \\
 			\hline
 		\end{tabular}
-		\caption{Monophonic dataset label distribution}
+		\caption{Monophonic dataset label distribution.}
 		\label{tab:mono_distribution}
 	\end{center}
 \end{table}
 
-Moreover, the recordings have different properties since they come from \url{www.freesound.org} and are taken as they are. The first difference is in the audio lengths visible in figure \ref{fig:mono_duration}: the majority of audio have a duration of about 3.5/4 seconds, but there exists also smaller recordings which are in a tiny number.
+Moreover, the recordings have different properties since they come from \url{www.freesound.org} and are taken as they are. The first difference is in the audio lengths visible in figure \ref{fig:mono_duration}: the majority of audio have a duration of about 3.5/4 seconds, but there exist also smaller recordings which are in a tiny number.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./images/mono/duration.png}	
-	\caption{Audio duration distribution}
+	\caption{Monophonic audio duration distribution.}
 	\label{fig:mono_duration}
 \end{figure}
 
-The main differences are in bit depth, from 4 to 32 bit, the majority with 16 bit; and in the sample rate, from 8 KHz to 192 KHz, with the majority with 44.1 KHz. This may be a concern since some audio have a poor quality which can translate in poorer feature w.r.t. the other tracks. All these differences will be equalized during the data preprocessing phase.
+The main differences are in bit depth, from 4 to 32 bit, the majority with 16 bit; and in the sample rate, from 8 KHz to 192 KHz, with the majority with 44.1 KHz. This may be a concern since some audio have a poor quality which can translate in poorer features w.r.t. the other tracks. All these differences will be equalized during the data preprocessing phase.
 
 \subsection{Data pre-processing}
 \label{subsec:mono_feature}
 
-This phase adopts librosa \cite{mcfee2015librosa}, which is a sound processing library for python. Its use helps to deal with different audio characteristics since by default librosa converts audio to 22 KHz sampling rate and 16 bit depth. Since the majority of audio recordings are at 44.1 KHz, it may seem that down sampling may reduce audio quality, but if we visualize the sound with a spectrogram, it will be clear that most of frequency content is distributed well below the 11 KHz (which is the maximum frequency a 22 KHz sampling rate can process), so in this case it reduces the dimension of the data without losing much information. For what concerns the bit depth, the majority of recordings are already at 16 bit, so it does not change much the data. Audio file are loaded and transformed into array series by \textit{load} function, which is also responsible of audio conversion and standardization.\newline
-The reference paper \cite{drossos2020sound} uses Mel Frequency Cepstral Coefficients (MFCC) to transform the audio array in something the network can learn from. MFCCs are a way of measuring the rate of information change in spectral bands and storing it in coefficients; moreover, the rate of change is modeled in a non linear way since the Mel band is logarithmic and the adoption of this band is able to capture the rate of change in a similar way to what the human hear does \cite{MFCC}. \newline
-The idea is to extract the MFCC with the basic settings and change just the number of feature extracted per frame to 40 to adapt it to reference paper \cite{drossos2020sound}. The principal basic setting is using a window of 2048 bit for the Fast Fourier Transform inside the MFCC extractor, the other settings are of minor importance in this case. The correspondence between the window and a temporal interval is given by the following formula: 
+This phase adopts \textit{librosa} \cite{mcfee2015librosa}, which is a sound processing library for python. Its use helps to deal with different audio characteristics since by default librosa converts audio to 22 KHz sampling rate and 16 bit depth. Since the majority of audio recordings are at 44.1 KHz, it may seem that down sampling may reduce audio quality, but if we visualize the sound with a spectrogram, it will be clear that most of frequency content is distributed well below the 11 KHz (which is the maximum frequency a 22 KHz sampling rate can process), so in this case it reduces the dimension of the data without losing much information. For what concerns the bit depth, the majority of recordings are already at 16 bit, so it does not change much the data. Audio file are loaded and transformed into array series by \textit{load} function, which is also responsible for audio conversion and standardization.\newline
+The reference paper \cite{drossos2020sound} uses Mel Frequency Cepstral Coefficients (MFCC) to transform the audio array in something the network can learn from. MFCCs are a way of measuring the rate of information change in spectral bands and storing it in coefficients; moreover, the rate of change is modeled in a non linear way since the Mel band is logarithmic and the adoption of this band is able to capture the rate of change in a similar way to what the human hearing does \cite{MFCC}. \newline
+The idea is to extract the MFCC with the basic settings and change just the number of features extracted per frame to 40 to adapt it to reference paper \cite{drossos2020sound}. The principal basic setting is using a window of 2048 bit for the Fast Fourier Transform inside the MFCC extractor, the other settings are of minor importance in this case. The correspondence between the window and a temporal interval is given by the following formula: 
  
 \begin{equation} \label{eq:window_interval}
 	window\_interval = \cfrac{bit\_ftt}{sampling\_rate}
 \end{equation}
 
-This means that if the sampling rate is 22 KHz and the number of bit is 2048, then the window interval is about 93 ms. The execution shows that 93 ms are too much for just 3 recordings which have a smaller duration. The result of feature extraction is a matrix of 40 features by a varying length depending on the length of the processed audio. Here a problem arises: a neural network may only process input of equal length, so the smaller recordings are padded with zeros to reach the dimension of the longer audio, which has a length of 174 frames. The data are ready to be feed as input of the neural network now.\newline
+This means that if the sampling rate is 22 KHz and the number of bit is 2048, then the window interval is about 93 ms. The execution shows that 93 ms are too much for just 3 recordings which have a smaller duration. The result of data pre-processing is a matrix of 40 features by a varying length depending on the time length of the processed audio. Here a problem arises: a neural network can only process inputs of equal length, so the smaller recordings are padded with zeros to reach the dimension of the longer audio, which has a length of 174 frames. The data are ready to be feed as input of the neural network now.\newline
 A small technical digression: since python based libraries for sound processing are easier to use but slower, the extracted features are saved in pickle file to be easily loaded without reprocessing every time the dataset \cite{pickle}.\newline
 Processed data are labeled with a categorical encoding using \textit{keras utils} and \textit{sklearn preprocessing} in automatic way.
 
@@ -149,17 +149,17 @@ Each model accepts an input of the following form: the first dimension is time, 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images/mono/baseline.png}	
-	\caption{Baseline model for monophonic SED}
+	\caption{Baseline model for monophonic SED.}
 	\label{fig:mono_baseline}
 \end{figure}
 
-The baseline model is composed by 3 convolutional layer and 1 recurrent layer. Each convolution is followed by batch normalization, max pooling and dropout. Each convolution uses 256 channel, 5x5 kernel, unitary stride and ReLU activation function. Padding is added to preserve the input dimension (\textit{same} padding). Max pooling is performed with different kernel dimension in the layers: (1,5), (1,4) and (1,2) respectively, with same padding to maintain dimension: this strange arrangement of pooling is to obtain a unitary feature dimension at the end of the third convolutional layer and preserve unchanged the time dimension. Dropout is added to reduce overfitting and it has a rate of 0.25. Since feature dimension is reduced to a unit, the tensor is reshaped to a matrix composed by the number of frames as rows and the number of channel as columns. This tensor is the input of the recurrent layer, which is a Gated Recurrent Unit of 256 unit. The output of the GRU is the input of a dense layer with 10 outputs and softmax activation function. The role of the 3 components is the following: the convolutions acts as feature extractor from the MFCCs, the GRU are used to identify temporal pattern and the dense layer is used as classifier. The model is trained using adam as optimizer, with categorical cross-entropy as cost function and categorical accuracy as metric. Adam optimizer is used with standard parameters \cite{kingma2017adam}. A representation of baseline model can be found in fig. \ref{fig:mono_baseline}\newline
-The proposed approach substitutes the convolutional layers with depth-wise separable convolutions and the recurrent layer with dilated convolution. Parameters are equal to the previous model, the only difference is that dilated convolution output has 3 dimension plus the batch size, so a global average pooling is used to reduce the dimension to feed the dense layer. This is a modification of the proposed approach of \cite{drossos2020sound} since the dilated convolution are designed to output a tensor which can be reshaped to a 2D output to maintain temporal frames, instead in this case it is necessary to just assign a single category to all the frames together since only one sound is contained in each audio input, so I decided to use global average pooling to connect dilated convolution and the dense layer. Initially I tried to apply a convolution with unitary kernel and (1,3) stride to reduce dimension, followed by a max pooling to connect to dense layer but it produced worse result and I adopted the global average pooling solution; in both cases of proposed approach performs very poorly compared to baseline model, as it will be seen in section \ref{sec:results}. This is due to the fact that the proposed model was developed for polyphonic SED and it is adapted to this case, probably a better formulation is possible for this specific case. Representation of proposed model architecture is visible in fig. \ref{fig:mono_new_model}.
+The baseline model is composed by 3 convolutional layers and 1 recurrent layer. Each convolution is followed by batch normalization, max pooling and dropout. Each convolution uses 256 channel, 5x5 kernel, unitary stride and ReLU activation function. Padding is added to preserve the input dimension (\textit{same} padding). Max pooling is performed with different kernel dimensions in the layers: (1,5), (1,4) and (1,2) respectively, with same padding to maintain dimension: this strange arrangement of pooling is to obtain a unitary feature dimension at the end of the third convolutional layer and preserve unchanged the time dimension. Dropout is added to reduce overfitting and it has a rate of 0.25. Since feature dimension is reduced to a unit, the tensor is reshaped to a matrix composed by the number of frames as rows and the number of channel as columns. This tensor is the input of the recurrent layer, which is a Gated Recurrent Unit of 256 units. The output of the GRU is the input of a dense layer with 10 outputs and softmax activation function. The role of the 3 components is the following: the convolutions act as feature extractor from the MFCCs, the GRU are used to identify temporal pattern and the dense layer is used as classifier. The model is trained using \textit{adam} as optimizer, with \textit{categorical cross-entropy} as cost function and \textit{categorical accuracy} as metric. Adam optimizer is used with standard parameters \cite{kingma2017adam}. A representation of baseline model can be found in fig. \ref{fig:mono_baseline}.\newline
+The proposed approach substitutes the convolutional layers with depth-wise separable convolutions and the recurrent layer with dilated convolution. Parameters are equal to the previous model, the only difference is that dilated convolution output has 3 dimensions plus the batch size, so a global average pooling is used to reduce the dimensions to feed the dense layer. This is a modification of the proposed approach of \cite{drossos2020sound} since the dilated convolutions are designed to output a tensor which can be reshaped to a 2D output to maintain temporal frames, instead in this case it is necessary to just assign a single category to all the frames together since only one sound is contained in each audio input, so I decided to use global average pooling to connect dilated convolution and the dense layer. Initially I tried to apply a convolution with unitary kernel and (1,3) stride to reduce dimension, followed by a max pooling to connect to dense layer but it produced worse result and I adopted the global average pooling solution; in both cases of proposed approach it performs very poorly compared to baseline model, as it will be seen in section \ref{sec:results}. This is due to the fact that the proposed model was developed for polyphonic SED and it is adapted to this case, probably a better formulation is possible for this specific case. Representation of proposed model architecture is visible in fig. \ref{fig:mono_new_model}.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images/mono/new_model.png}	
-	\caption{Proposed model for monophonic SED}
+	\caption{Proposed model for monophonic SED.}
 	\label{fig:mono_new_model}
 \end{figure}
 
@@ -221,7 +221,7 @@ The dataset is composed by 100 long sound recordings (about some minutes) contai
 			bus 				& 456 \\
 			\hline
 		\end{tabular}
-		\caption{Monophonic dataset label distribution}
+		\caption{polyphonic dataset label distribution.}
 		\label{tab:poly_distribution}
 	\end{center}
 \end{table}
@@ -231,7 +231,7 @@ From the table, it is easily visible that classes are not distributed equally, m
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\textwidth]{./images/poly/duration.png}	
-	\caption{Decision trees assembly only confusion matrix}
+	\caption{Polyphonic audio duration distribution.}
 	\label{fig:poly_duration}
 \end{figure}
 
@@ -247,8 +247,8 @@ Extracted data are then subdivided in sub-vectors of features composed by 1024 t
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{./images/poly/processed_example.png}	
-	\caption{Baseline model for polyphonic SED}
+	\includegraphics[width=0.9\textwidth]{./images/poly/processed_example.png}	
+	\caption{Representation of pre-processed data with Mel spectrogram on the upper part and labeled data in the lower part.}
 	\label{fig:poly_processed}
 \end{figure}
 
@@ -257,7 +257,7 @@ Fig. \ref{fig:poly_processed} contains an example of visualization of processed 
 \subsection{Data labeling}
 \label{subsec:poly_label}
 
-Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the model proposed are able to bring satisfactory results. This means that it is not good to rely only on accuracy since the dataset is highly unbalanced, so authors of \cite{drossos2020sound} propose to use f1-score. This fact can be easily recognized in lower part of figure \ref{fig:poly_processed}.
+Since here we are dealing with polyphonic SED, the data labeling is more complex of what it has been seen in section \ref{subsec:mono_feature}. Data are labeled manually with a one hot encode: each sub-vector is instead a matrix of 1024 time frames by 40 features, and each time frame must be labeled with 16 possible classes; a zero if the class is not present and 1 if the class is present in the chosen time frame. This method will output a 1024 time frame by 16 classes matrix which will be used as ground truth during the training. This way of labeling will eventually bring a label matrix whose composition is mainly based on zeros, which will made a hard problem but the models proposed are able to bring satisfactory results. This means that it is not good to rely only on accuracy since the dataset is highly unbalanced, so authors of \cite{drossos2020sound} propose to use f1-score. This fact can be easily recognized in lower part of figure \ref{fig:poly_processed}.
 
 \subsection{Model formulation}
 \label{subsec:poly_model}
@@ -267,36 +267,36 @@ This section will explain multiple model architecture introduced for poly SED: a
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./images/poly/baseline.png}	
-	\caption{Baseline model for polyphonic SED}
+	\caption{Baseline model for polyphonic SED.}
 	\label{fig:poly_baseline}
 \end{figure}
 
 The baseline model is similar to the one used in section \ref{subsec:mono_model}, but the GRU is configured to give back also the time frames and not only the features. Other different parameters are the activation function of dense layer, a \textit{sigmoid}, the loss function, \textit{binary cross-entropy}, and the metric, \textit{binary accuracy}. A representation can be found in fig. \ref{fig:poly_baseline}.\newline
-The dilated baseline substitutes the recurrent neural network with a dilated convolution: the block comprehend a dilated convolution, batch normalization, max pooling and dropout; it is followed by a 1x1 convolution with (1,3) stride since the original paper \cite{drossos2020sound} uses a dilated convolution directly with stride (1,3) but the framework used in this project (keras) does not allow to specify both dilation and stride different from 1, so I though that a possible solution to overcome that could have been to use the 1x1 convolution with (1,3) stride. \newline
-Different values of kernel and dilation has been proposed in \cite{drossos2020sound}, I have chosen a 3x3 kernel with 10 as time dilation rate since it seemed a good compromise. Before executing the dilated convolution, input is padded on temporal dimension only of a value equal to the dilation rate to obtain an untouched temporal dimension as output of convolutional layer. All other unspecified parameters are unchanged and equal to baseline model. The adoption of dilated convolutions allows to model long temporal context, reduce parameters number and eliminate the dissolving gradient for longer temporal sequences. Fig. \ref{fig:poly_dilated} contains a representation of this model.
+The dilated baseline substitutes the recurrent neural network with a dilated convolution: the block comprehends a dilated convolution, batch normalization, max pooling and dropout; it is followed by a 1x1 convolution with (1,3) stride since the original paper \cite{drossos2020sound} uses a dilated convolution directly with stride (1,3) but the framework used in this project (Keras) does not allow to specify both dilation and stride different from 1, so I though that a possible solution to overcome this could have been to use the 1x1 convolution with (1,3) stride. \newline
+Different values of kernel and dilation has been proposed in \cite{drossos2020sound}, I have chosen a 3x3 kernel with 10 as time dilation rate since it seemed a good compromise. Before executing the dilated convolution, input is padded on temporal dimension only of a value equal to the dilation rate to obtain an untouched temporal dimension as output of convolutional layer. All other unspecified parameters are unchanged and equal to baseline model. The adoption of dilated convolutions allow to model long temporal context, reduce parameters number and eliminate the dissolving gradient for longer temporal sequences. Fig. \ref{fig:poly_dilated} contains a representation of this model.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.95\textwidth]{./images/poly/dilated.png}	
-	\caption{Dilated baseline model for polyphonic SED}
+	\caption{Dilated baseline model for polyphonic SED.}
 	\label{fig:poly_dilated}
 \end{figure}
 
-The dessed baseline substitutes the convolutional layers with depth-wise separable convolutions; all other operations and parameters are equal to the baseline. This substitution allows to drastically reduce the amount of used parameters in the firsts layers. It is possible to see a representation of the model in fig. \ref{fig:poly_dessed}.
+The dessed baseline substitutes the convolutional layers with depth-wise separable convolutions; all other operations and parameters are equal to the baseline. This substitution allows to drastically reduce the amount of used parameters in the first layers. It is possible to see a representation of the model in fig. \ref{fig:poly_dessed}.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.95\textwidth]{./images/poly/dessed.png}	
-	\caption{Dessed baseline model for polyphonic SED}
+	\caption{Dessed baseline model for polyphonic SED.}
 	\label{fig:poly_dessed}
 \end{figure}
 
-The combination of dessed and dilated model is what the reference paper \cite{drossos2020sound} proposes as new approach to polyphonic SED, which theoretically should decrement the total number of parameters of about 7 times and give better prediction. During the training phase I had to propose a modification of the dilated part since the 1x1 convolution block does not work well in cooperation with depth-wise separable convolution so I adopted a max pooling operation with kernel and stride of dimension (1,3) and this gives satisfying results. A representation can be found in fig. \ref{fig:poly_new_model}.
+The combination of dessed and dilated model is what the reference paper \cite{drossos2020sound} proposes as new approach to polyphonic SED, which theoretically should decrement the total number of parameters of about 7 times and give better prediction. During the training phase I had to propose a modification of the dilated part since the 1x1 convolution block does not work well in cooperation with depth-wise separable convolution so I adopted a max pooling operation with kernel and stride of dimension (1,3) and this gave satisfying results. A representation can be found in fig. \ref{fig:poly_new_model}.
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.95\textwidth]{./images/poly/new model.png}	
-	\caption{Proposed model for polyphonic SED}
+	\caption{Proposed model for polyphonic SED.}
 	\label{fig:poly_new_model}
 \end{figure}
 
@@ -320,20 +320,20 @@ Baseline model performs well overall: it has been trained for 159 epochs, a tota
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/mono/baseline_acc.png}
-		\caption{Accuracy}
+		\caption{Accuracy.}
 		%\label{fig:sub1}
 	\end{subfigure}%
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/mono/baseline_loss.png}
-		\caption{Loss}
+		\caption{Loss.}
 		%\label{fig:sub2}
 	\end{subfigure}
 	\caption{Baseline training graphs}
 	\label{fig:mono_base_result}
 \end{figure}
 
-This model achieved an overall accuracy of 0.824; differently from what it has been said in section \ref{subsec:mono_analysis}, the classes with lowest number of elements are not the ones with lowest f1-score, probably that is caused by some difficulties which depends on sound properties primarily and not on class population. Tab \ref{tab:mono_base_f1} contains values of f1-score for each class for values tested on baseline model. The value of loss function, instead, goes down till 0.521, and it's the lowest value recorded during training; on test set it is 0.524. 
+This model achieved an overall accuracy of 0.824; differently from what it has been said in section \ref{subsec:mono_analysis}, the classes with lowest number of elements are not the ones with lowest f1-score, probably that is caused by some difficulties which depend on sound properties primarily and not on class population. Table \ref{tab:mono_base_f1} contains values of f1-score for each class for values tested on baseline model. The value of loss function, instead, goes down till 0.521, and it's the lowest value recorded during training; on test set it is 0.524. 
 
 \begin{table}[h]
 	\begin{center}
@@ -369,7 +369,7 @@ This model achieved an overall accuracy of 0.824; differently from what it has b
 			\hline
 		\end{tabular}
 		}
-		\caption{Monophonic baseline f1-score per class}
+		\caption{Monophonic baseline f1-score per class.}
 		\label{tab:mono_base_f1}
 	\end{center}
 \end{table}
@@ -390,52 +390,52 @@ For what concerns the proposed model, it does not adapt well to the monophonic S
 		\caption{Loss}
 		%\label{fig:sub2}
 	\end{subfigure}
-	\caption{Proposed model training graphs}
+	\caption{Proposed model training graphs.}
 	\label{fig:mono_new_result}
 \end{figure}
 
-It must be said that the proposed model was developed for polyphonic SED, so maybe it's the fault of adaptation proposed and better model can be proposed to overcome the bad result of this model. I suppose the part causing this poor results is the connection between the dilated convolution and the dense layer: two ideas arises, or the dilated convolution is not the right choice when it is needed just a label for each recording and not a multilabel, or the global average pool is not the right way to downscale from dilated convolution to dense layer.
+It must be said that the proposed model was developed for polyphonic SED, so maybe it's the fault of adaptation proposed and a better model can be proposed to overcome the bad result of this model. I suppose the part causing this poor results is the connection between the dilated convolution and the dense layer: two ideas arises, or the dilated convolution is not the right choice when it is needed just a label for each recording and not a multilabel, or the global average pooling is not the right way to downscale from dilated convolution to dense layer.
 
 \subsection{Polyphonic results}
 \label{subsec:poly_results}
 
-Baseline model performs good: it trains for a small number of epochs, just 62, and learns very fast, getting a test accuracy of 0.962 and test loss of 0.135. From fig. \ref{fig:poly_base_result}, it can be seen that this model present a visible overfit after about 20 epochs, the best model is taken from epoch 32 so it is the best combination between generalization and overfitting of this case. 
+Baseline model performs good: it trains for a small number of epochs, just 62, and learns very fast, getting a test accuracy of 0.962 and test loss of 0.135. From fig. \ref{fig:poly_base_result}, it can be seen that this model presents a visible overfit after about 20 epochs, the best model is taken from epoch 32 so it is the best combination between generalization and overfitting of this case. 
 
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/baseline_acc.png}
-		\caption{Accuracy}
+		\caption{Accuracy.}
 		%\label{fig:sub1}
 	\end{subfigure}%
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/baseline_loss.png}
-		\caption{Loss}
+		\caption{Loss.}
 		%\label{fig:sub2}
 	\end{subfigure}
-	\caption{Baseline training graphs}
+	\caption{Baseline training graphs.}
 	\label{fig:poly_base_result}
 \end{figure}
 
-F1-score has been computed manually on a micro averaging measure; in this case it is 0.715, higher w.r.t. what achieved in \cite{drossos2020sound}. Training requires half an hour in this case.
+F1-score has been computed manually on a micro averaging measure; in this case it is 0.715, higher w.r.t. what achieved in \cite{drossos2020sound}. Training required half an hour in this case.
 
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/dilated_acc.png}
-		\caption{Accuracy}
+		\caption{Accuracy.}
 		%\label{fig:sub1}
 	\end{subfigure}%
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/dilated_loss.png}
-		\caption{Loss}
+		\caption{Loss.}
 		%\label{fig:sub2}
 	\end{subfigure}
-	\caption{Dilated model training graphs}
+	\caption{Dilated model training graphs.}
 	\label{fig:poly_dil_result}
 \end{figure}
  
@@ -448,16 +448,16 @@ The introduction of depth-wise separable convolutions allows to reduce drastical
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/dessed_acc.png}
-		\caption{Accuracy}
+		\caption{Accuracy.}
 		%\label{fig:sub1}
 	\end{subfigure}%
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/dessed_loss.png}
-		\caption{Loss}
+		\caption{Loss.}
 		%\label{fig:sub2}
 	\end{subfigure}
-	\caption{Dessed model training graphs}
+	\caption{Dessed model training graphs.}
 	\label{fig:poly_des_result}
 \end{figure}
 
@@ -468,16 +468,16 @@ Overall the model loses about 0.1 point of f1-score, 0.633, which is enough to s
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/new model_acc.png}
-		\caption{1x1 convolution}
+		\caption{1x1 convolution.}
 		%\label{fig:sub1}
 	\end{subfigure}%
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/new model_acc_new.png}
-		\caption{Max pooling}
+		\caption{Max pooling.}
 		%\label{fig:sub2}
 	\end{subfigure}
-	\caption{Proposed model accuracy comparison}
+	\caption{Proposed model accuracy comparison.}
 	\label{fig:poly_new_acc}
 \end{figure}
 
@@ -489,16 +489,16 @@ The other alternative used, is to adopt a  max pooling layer with (1,3) dimensio
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/new model_loss.png}
-		\caption{1x1 convolution}
+		\caption{1x1 convolution.}
 		%\label{fig:sub1}
 	\end{subfigure}%
 	\begin{subfigure}{.5\textwidth}
 		\centering
 		\includegraphics[width=.9\linewidth]{./images/poly/new model_loss_new.png}
-		\caption{Max pooling}
+		\caption{Max pooling.}
 		%\label{fig:sub2}
 	\end{subfigure}
-	\caption{Proposed model loss comparison}
+	\caption{Proposed model loss comparison.}
 	\label{fig:poly_new_loss}
 \end{figure}
 
@@ -524,7 +524,7 @@ Even if the f1-score is much different, both new models have a similar training 
 				
 				\hline
 		\end{tabular}}
-		\caption{Polyphonic model results}
+		\caption{Polyphonic model results.}
 		\label{tab:poly_results}
 	\end{center}
 \end{table}
